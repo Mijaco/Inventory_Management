@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- @author Ahasanul Ashid, IBCS, @author Abu Taleb, IBCS -->
+<!-- Generated Mar 4, 2012 1:02:37 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <!-- <class name="com.ibcs.desco.acl.model.ObjectReference" schema="${database.user}" table="OBJECT_REFERENCE"> -->
+  <class name="com.ibcs.desco.acl.model.ObjectReference" table="OBJECT_REFERENCE">
+    <id name="id">
+      <column name="ID"/>
+      <generator class="increment"/>
+    </id>
+    <property name="class_name" type="string">
+      <column length="100" name="CLASS_NAME" not-null="true"/>
+    </property>
+    <property name="class_reference" type="string">
+      <column length="1000" name="CLASS_REFERENCE"/>
+    </property>
+  </class>
+</hibernate-mapping>

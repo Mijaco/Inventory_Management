@@ -1,0 +1,102 @@
+.mygrid div {
+	margin-top: 25px;
+	margin-bottom: 25px;
+}
+
+.icon-box {
+	min-height: 86vh;
+}
+
+.input_underline {
+	border: 0;
+	border-bottom: 2px ridge;
+}
+
+.dropdown-submenu {
+	position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+	top: 0;
+	left: 100%;
+	margin-top: -6px;
+	margin-left: -1px;
+	-webkit-border-radius: 0 6px 6px 6px;
+	-moz-border-radius: 0 6px 6px 6px;
+	border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+	display: block;
+}
+
+.dropdown-submenu>a:after {
+	display: block;
+	content: " ";
+	float: right;
+	width: 0;
+	height: 0;
+	border-color: transparent;
+	border-style: solid;
+	border-width: 5px 0 5px 5px;
+	border-left-color: #cccccc;
+	margin-top: 5px;
+	margin-right: -10px;
+}
+
+.dropdown-submenu:hover>a:after {
+	border-left-color: #ffffff;
+}
+
+.dropdown-submenu.pull-left {
+	float: none;
+}
+
+.dropdown-submenu.pull-left>.dropdown-menu {
+	left: -100%;
+	margin-left: 10px;
+	-webkit-border-radius: 6px 0 6px 6px;
+	-moz-border-radius: 6px 0 6px 6px;
+	border-radius: 6px 0 6px 6px;
+}
+
+.ui-datepicker td>a.ui-state-active {
+    background-color: #2283c5;
+    color: #0925e8;
+}
+
+.ubuntu-font {
+	font-family: 'Ubuntu Condensed', sans-serif;
+}
+
+/* added by taleb : editable select css start : http://jsfiddle.net/nwH8A/ */
+.select-editable {
+     position:relative;
+     background-color:white;
+     border:solid grey 1px;
+     width:120px;
+     height:18px;
+ }
+ .select-editable select {
+     position:absolute;
+     top:0px;
+     left:0px;
+     font-size:14px;
+     border:none;
+     width:120px;
+     margin:0;
+ }
+ .select-editable input {
+     position:absolute;
+     top:0px;
+     left:0px;
+     width:100px;
+     padding:1px;
+     font-size:12px;
+     border:none;
+ }
+ .select-editable select:focus, .select-editable input:focus {
+     outline:none;
+ }
+ 
+ /* editable select css end */

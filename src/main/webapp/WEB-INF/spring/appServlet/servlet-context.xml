@@ -1,0 +1,903 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/security
+			http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+	<!-- @author Ahasanul Ashid, IBCS, @author Abu Taleb, IBCS -->
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing 
+		infrastructure -->
+
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+
+	<!-- To enable Method Security Expressions and custom PermissionEvaluator 
+		we need to add the following -->
+	<security:global-method-security
+		pre-post-annotations="enabled" secured-annotations="enabled">
+		<security:expression-handler ref="expressionHandler" />
+	</security:global-method-security>
+
+	<!-- Declare a custom PermissionEvaluator interface -->
+	<beans:bean class="com.ibcs.desco.acl.security.CustomPermissionEvaluator"
+		id="customPermissionEvaluator" />
+
+	<!-- To use hasPermission() expressions, we have to configure a PermissionEvaluator -->
+	<beans:bean id="expressionHandler"
+		class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
+		<beans:property name="permissionEvaluator" ref="customPermissionEvaluator" />
+		<!--<property name = "roleHierarchy" ref="roleHierarchy"/> -->
+	</beans:bean>
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving 
+		up static resources in the ${webappRoot}/resources directory -->
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<beans:bean id="properties"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<beans:property name="locations">
+			<beans:list>
+				<beans:value>classpath:common.properties</beans:value>
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources 
+		in the /WEB-INF/views directory -->
+	<beans:bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<!-- Bellow Line Added for Read xml property from Jsp Like Object Bean 
+			and Object Property -->
+		<beans:property name="exposeContextBeansAsAttributes"
+			value="true" />
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+		<!-- get common setting properties from properties file to JSP page -->
+		<beans:property name="exposedContextBeanNames">
+			<beans:list>
+				<beans:value>properties</beans:value>
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<!-- Annotation Configuration -->
+	<context:annotation-config />
+
+	<!-- Declare Base Package -->
+	<context:component-scan base-package="com.ibcs.desco" />
+
+	<!-- Read Properties file from Classpath (dir : src/main/resources) -->
+	<context:property-placeholder location="classpath:database.properties"
+		ignore-unresolvable="true" />
+
+	<!-- Database Property -->
+	<beans:bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<beans:property name="driverClassName"
+			value="${hibernate.connection.driver_class}" />
+		<beans:property name="url" value="${hibernate.connection.url}" />
+		<beans:property name="username" value="${hibernate.connection.username}" />
+		<beans:property name="password" value="${hibernate.connection.password}" />
+	</beans:bean>
+
+	<!-- Hibernate 4 SessionFactory Bean definition -->
+	<beans:bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<beans:property name="dataSource" ref="dataSource" />
+		<beans:property name="packagesToScan">
+			<beans:list>
+				<beans:value>com.ibcs.desco.acl.model</beans:value>
+				<beans:value>com.ibcs.desco.admin.model</beans:value>
+				<beans:value>com.ibcs.desco.common.model</beans:value>
+				<beans:value>com.ibcs.desco.cs.model</beans:value>
+				<beans:value>com.ibcs.desco.procurement.model</beans:value>
+				<beans:value>com.ibcs.desco.inventory.model</beans:value>
+				<beans:value>com.ibcs.desco.test.model</beans:value>
+				<beans:value>com.ibcs.desco.cs.model</beans:value>
+				<beans:value>com.ibcs.desco.subStore.model</beans:value>
+				<beans:value>com.ibcs.desco.localStore.model</beans:value>
+				<beans:value>com.ibcs.desco.contractor.model</beans:value>
+				<beans:value>com.ibcs.desco.workshop.model</beans:value>
+				<beans:value>com.ibcs.desco.fixedassets.model</beans:value>
+				<beans:value>com.ibcs.desco.budget.model</beans:value>
+
+				<!-- <beans:value>com.ibcs.acl</beans:value> -->
+			</beans:list>
+		</beans:property>
+		<beans:property name="hibernateProperties">
+			<beans:props>
+				<beans:prop key="hibernate.dialect">${hibernate.dialect}
+				</beans:prop>
+				<beans:prop key="hibernate.show_sql">${hibernate.show_sql}</beans:prop>
+				<beans:prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</beans:prop>
+				<beans:prop key="hibernate.id.new_generator_mappings">true</beans:prop>
+			</beans:props>
+		</beans:property>
+	</beans:bean>
+
+	<!-- Session Send to Java via Annotation -->
+	<tx:annotation-driven />
+
+	<!-- Declare Transection Manager -->
+	<beans:bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<!-- cache Clear and Back Button Disable after Logout -->
+	<interceptors>
+		<interceptor>
+			<mapping path="/**/*" />
+			<beans:bean id="webContentInterceptor"
+				class="org.springframework.web.servlet.mvc.WebContentInterceptor">
+				<beans:property name="cacheSeconds" value="0" />
+			</beans:bean>
+		</interceptor>
+	</interceptors>
+
+
+	<!-- Testing User's permission on JSP page -->
+	<beans:bean class="com.ibcs.desco.acl.model.User" id="abc" />
+
+	<!-- For AuthUser Insert Update select and delete -->
+	<beans:bean id="userDao" class="com.ibcs.desco.admin.dao.UserDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="userService"
+		class="com.ibcs.desco.admin.service.UserServiceImpl">
+		<beans:property name="userDao" ref="userDao"></beans:property>
+	</beans:bean>
+
+	<!-- For Roles Insert Update select and delete -->
+	<beans:bean id="roleDao" class="com.ibcs.desco.admin.dao.RoleDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="roleService"
+		class="com.ibcs.desco.admin.service.RoleServiceImpl">
+		<beans:property name="roleDao" ref="roleDao"></beans:property>
+	</beans:bean>
+
+	<!-- For Permission Insert Update select and delete -->
+	<beans:bean id="permissionDao" class="com.ibcs.desco.admin.dao.PermissionDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="permissionService"
+		class="com.ibcs.desco.admin.service.PermissionServiceImpl">
+		<beans:property name="permissionDao" ref="permissionDao"></beans:property>
+	</beans:bean>
+	<!-- For ObjectReference Insert Update select and delete -->
+	<beans:bean id="objectRefDao" class="com.ibcs.desco.admin.dao.ObjectRefDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="objectRefService"
+		class="com.ibcs.desco.admin.service.ObjectRefServiceImpl">
+		<beans:property name="objectRefDao" ref="objectRefDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="departmentsDao" class="com.ibcs.desco.admin.dao.DepartmentsDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="departmentsService"
+		class="com.ibcs.desco.admin.service.DepartmentsServiceImpl">
+		<beans:property name="departmentsDao" ref="departmentsDao"></beans:property>
+	</beans:bean>
+
+
+
+	<!-- For AdminController -->
+	<beans:bean id="adminController"
+		class="com.ibcs.desco.admin.controller.AdminController">
+		<beans:property name="userService" ref="userService" />
+		<beans:property name="roleService" ref="roleService" />
+		<beans:property name="permissionService" ref="permissionService" />
+		<beans:property name="objectRefService" ref="objectRefService" />
+	</beans:bean>
+
+
+
+	<!-- For Vendor Insert Update select and delete -->
+	<beans:bean id="vendorDao"
+		class="com.ibcs.desco.procurement.dao.VendorDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="vendorService"
+		class="com.ibcs.desco.procurement.service.VendorServiceImpl">
+		<beans:property name="vendorDao" ref="vendorDao"></beans:property>
+	</beans:bean>
+
+
+	<!-- Master-Details Start as RequistionMst and RequistionDtl -->
+
+
+	<!-- for inventory insert update delete -->
+	<beans:bean id="itemGroupDao"
+		class="com.ibcs.desco.inventory.dao.ItemGroupDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="itemInventoryDaoImpl"
+		class="com.ibcs.desco.inventory.dao.ItemInventoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="lookUpDaoImpl" class="com.ibcs.desco.inventory.dao.LookUpDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="openingBalanceDao"
+		class="com.ibcs.desco.inventory.dao.OpeningBalanceDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="storeRequisitionMasterDAO"
+		class="com.ibcs.desco.inventory.dao.StoreRequisitionMasterDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="storeRequisitionDetailsDAO"
+		class="com.ibcs.desco.inventory.dao.StoreRequisitionDetailsDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="requisitionDetailsDAO"
+		class="com.ibcs.desco.procurement.dao.RequisitionDetailsDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+		<beans:property name="requisitionMasterDAO" ref="requisitionMasterDAO" />
+	</beans:bean>
+
+	<beans:bean id="requisitionMasterDAO"
+		class="com.ibcs.desco.procurement.dao.RequisitionMasterDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="requisitionDetailsService"
+		class="com.ibcs.desco.procurement.service.RequisitionDetailsServiceImpl">
+		<beans:property name="requisitionDetailsDAO" ref="requisitionDetailsDAO"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="requisitionMasterService"
+		class="com.ibcs.desco.procurement.service.RequisitionMasterServiceImpl">
+		<beans:property name="requisitionMasterDAO" ref="requisitionMasterDAO"></beans:property>
+	</beans:bean>
+
+
+	<beans:bean id="procurementPriorityDAO"
+		class="com.ibcs.desco.procurement.dao.ProcurementPriorityDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="procurementPriorityService"
+		class="com.ibcs.desco.procurement.service.ProcurementPriorityServiceImpl">
+		<beans:property name="procurementPriorityDAO" ref="procurementPriorityDAO"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="centralStoreRequisitionDtlDao"
+		class="com.ibcs.desco.cs.dao.CentralStoreRequisitionDtlDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="centralStoreRequisitionMstDao"
+		class="com.ibcs.desco.cs.dao.CentralStoreRequisitionMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<!-- For ProcurementController -->
+	<beans:bean id="procurementController"
+		class="com.ibcs.desco.procurement.controller.ProcurementController">
+		<beans:property name="vendorService" ref="vendorService" />
+		<beans:property name="roleService" ref="roleService" />
+		<beans:property name="requisitionMasterService" ref="requisitionMasterService" />
+		<beans:property name="requisitionDetailsService" ref="requisitionDetailsService" />
+		<beans:property name="procurementPriorityService" ref="procurementPriorityService" />
+	</beans:bean>
+	<!-- Procurement Controller End -->
+
+	<!-- Central Store Management Start -->
+
+	<beans:bean id="returnSlipDtlDao" class="com.ibcs.desco.cs.dao.ReturnSlipDtlDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+		<beans:property name="returnSlipMstDao" ref="returnSlipMstDao" />
+	</beans:bean>
+
+	<beans:bean id="returnSlipMstDao" class="com.ibcs.desco.cs.dao.ReturnSlipMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="csItemReceivedDao" class="com.ibcs.desco.cs.dao.CSItemReceivedDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="centralStoreItemsDao"
+		class="com.ibcs.desco.cs.dao.CentralStoreItemsDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="centralStoreItemsService"
+		class="com.ibcs.desco.cs.service.CentralStoreItemsServiceImpl">
+		<beans:property name="centralStoreItemsDao" ref="centralStoreItemsDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="returnSlipMstService"
+		class="com.ibcs.desco.cs.service.ReturnSlipMstServiceImpl">
+		<beans:property name="returnSlipMstDao" ref="returnSlipMstDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csItemReceivedService"
+		class="com.ibcs.desco.cs.service.CSItemReceivedServiceImpl">
+		<beans:property name="csItemReceivedDao" ref="csItemReceivedDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="returnSlipDtlService"
+		class="com.ibcs.desco.cs.service.ReturnSlipDtlServiceImpl">
+		<beans:property name="returnSlipDtlDao" ref="returnSlipDtlDao"></beans:property>
+	</beans:bean>
+
+	<!-- For Master-Details CentralStoreController -->
+	<beans:bean id="centralStoreController"
+		class="com.ibcs.desco.cs.controller.CentralStoreController">
+	</beans:bean>
+
+	<!-- Central Stroe Recived Item with Master & Details -->
+
+	<beans:bean id="csProcItemRcvMstDao"
+		class="com.ibcs.desco.cs.dao.CSProcItemRcvMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csProcItemRcvDtlDao"
+		class="com.ibcs.desco.cs.dao.CSProcItemRcvDtlDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+		<beans:property name="csProcItemRcvMstDao" ref="csProcItemRcvMstDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csProcItemRcvMstService"
+		class="com.ibcs.desco.cs.service.CSProcItemRcvMstServiceImpl">
+		<beans:property name="csProcItemRcvMstDao" ref="csProcItemRcvMstDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csProcItemRcvDtlService"
+		class="com.ibcs.desco.cs.service.CSProcItemRcvDtlServiceImpl">
+		<beans:property name="csProcItemRcvDtlDao" ref="csProcItemRcvDtlDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csStoreTicketMstDao"
+		class="com.ibcs.desco.cs.dao.CSStoreTicketMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csStoreTicketDtlDao"
+		class="com.ibcs.desco.cs.dao.CSStoreTicketDtlDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+		<beans:property name="csStoreTicketMstDao" ref="csStoreTicketMstDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csStoreTicketMstService"
+		class="com.ibcs.desco.cs.service.CSStoreTicketMstServiceImpl">
+		<beans:property name="csStoreTicketMstDao" ref="csStoreTicketMstDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csStoreTicketDtlService"
+		class="com.ibcs.desco.cs.service.CSStoreTicketDtlServiceImpl">
+		<beans:property name="csStoreTicketDtlDao" ref="csStoreTicketDtlDao"></beans:property>
+	</beans:bean>
+
+	<!-- Central Store Management End -->
+
+	<!-- Common Management Start -->
+	<beans:bean id="approvalHierarchyDao"
+		class="com.ibcs.desco.common.dao.ApprovalHierarchyDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="operationDao" class="com.ibcs.desco.common.dao.OperationDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="stateDao" class="com.ibcs.desco.common.dao.StateDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="itemRcvApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.ItemRcvApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="storeTicketApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.StoreTicketApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="gatePassApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.GatePassApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="stateService"
+		class="com.ibcs.desco.common.service.StateServiceImpl">
+		<beans:property name="stateDao" ref="stateDao"></beans:property>
+	</beans:bean>
+	<beans:bean id="operationService"
+		class="com.ibcs.desco.common.service.OperationServiceImpl">
+		<beans:property name="operationDao" ref="operationDao"></beans:property>
+	</beans:bean>
+	<beans:bean id="gatePassApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.GatePassApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="gatePassApprovalHierarchyHistoryDao"
+			ref="gatePassApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="itemRcvApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.ItemRcvApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="itemRcvApprovalHierarchyHistoryDao"
+			ref="itemRcvApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="approvalHierarchyService"
+		class="com.ibcs.desco.common.service.ApprovalHierarchyServiceImpl">
+		<beans:property name="approvalHierarchyDao" ref="approvalHierarchyDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="storeTicketApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.StoreTicketApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="storeTicketApprovalHierarchyHistoryDao"
+			ref="storeTicketApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="commonDao" class="com.ibcs.desco.common.dao.CommonDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="commonService"
+		class="com.ibcs.desco.common.service.CommonServiceImpl">
+		<beans:property name="commonDao" ref="commonDao"></beans:property>
+	</beans:bean>
+
+	<!-- For CommonController -->
+	<beans:bean id="commonController"
+		class="com.ibcs.desco.common.controller.CommonController">
+		<beans:property name="roleService" ref="roleService" />
+		<beans:property name="approvalHierarchyService" ref="approvalHierarchyService" />
+
+	</beans:bean>
+	<!-- Common Management End -->
+
+	<!-- For localStore Start -->
+	<beans:bean id="lsCsRequisitionApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.LsCsRequisitionApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="lsCsRequisitionApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.LsCsRequisitionApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="lsCsRequisitionApprovalHierarchyHistoryDao"
+			ref="lsCsRequisitionApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="lsCsReturnSlipApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.LsCsReturnSlipApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="lsCsReturnSlipApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.LsCsReturnSlipApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="lsCsReturnSlipApprovalHierarchyHistoryDao"
+			ref="lsCsReturnSlipApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+	<!-- added by nasrin -->
+	<beans:bean id="lsSsRequisitionApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.LsSsRequisitionApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="lsSsRequisitionApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.LsSsRequisitionApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="lsSsRequisitionApprovalHierarchyHistoryDao"
+			ref="lsSsRequisitionApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="lsSsReturnSlipApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.LsSsReturnSlipApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="lsSsReturnSlipApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.LsSsReturnSlipApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="lsSsReturnSlipApprovalHierarchyHistoryDao"
+			ref="lsSsReturnSlipApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+	<!-- For localStore End -->
+
+	<!--for sub store -->
+	<beans:bean id="ssCsRequisitionApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.SsCsRequisitionApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="ssCsRequisitionApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.SsCsRequisitionApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="ssCsRequisitionApprovalHierarchyHistoryDao"
+			ref="ssCsRequisitionApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="ssCsReturnSlipApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.SsCsReturnSlipApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="ssCsReturnSlipApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.SsCsReturnSlipApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="ssCsReturnSlipApprovalHierarchyHistoryDao"
+			ref="ssCsReturnSlipApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+	<beans:bean id="subStoreRequisitionDtlService"
+		class="com.ibcs.desco.subStore.service.SubStoreRequisitionDTLServiceImpl">
+		<beans:property name="subStoreRequisitionDtlDao" ref="subStoreRequisitionDtlDao" />
+	</beans:bean>
+	<beans:bean id="subStoreRequisitionDtlDao"
+		class="com.ibcs.desco.subStore.dao.SubStoreRequisitionDtlDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="subStoreRequisitionMstService"
+		class="com.ibcs.desco.subStore.service.SubStoreRequisitionMstServiceImpl">
+		<beans:property name="subStoreRequisitionMstDao" ref="subStoreRequisitionMstDao"></beans:property>
+	</beans:bean>
+	<beans:bean id="subStoreRequisitionMstDao"
+		class="com.ibcs.desco.subStore.dao.SubStoreRequisitionMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+	<!--for sub store -->
+
+	<beans:bean id="workOrderMstService"
+		class="com.ibcs.desco.cs.service.WorkOrderMstServiceImpl">
+		<beans:property name="workOrderMstDao" ref="workOrderMstDao"></beans:property>
+	</beans:bean>
+
+
+	<beans:bean id="workOrderMstDao" class="com.ibcs.desco.cs.dao.WorkOrderMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="workOrderDtlService"
+		class="com.ibcs.desco.cs.service.WorkOrderDtlServiceImpl">
+		<beans:property name="workOrderDtlDao" ref="workOrderDtlDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="workOrderDtlDao" class="com.ibcs.desco.cs.dao.WorkOrderDtlDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csItemTransactionMstDao"
+		class="com.ibcs.desco.cs.dao.CSItemTransactionMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csItemTransactionMstService"
+		class="com.ibcs.desco.cs.service.CSItemTransactionMstServiceImpl">
+		<beans:property name="csItemTransactionMstDao" ref="csItemTransactionMstDao"></beans:property>
+	</beans:bean>
+
+	<!-- Vehicle Permission Start -->
+	<beans:bean id="vehiclePermissionDAO"
+		class="com.ibcs.desco.cs.dao.VehiclePermissionDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="vpAppHierHistoryDAO"
+		class="com.ibcs.desco.cs.dao.VPAppHierHistoryDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="vehiclePermissionService"
+		class="com.ibcs.desco.cs.service.VehiclePermissionServiceImpl">
+		<beans:property name="vehiclePermissionDAO" ref="vehiclePermissionDAO"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="vpAppHierHistoryService"
+		class="com.ibcs.desco.cs.service.VPAppHierHistoryServiceImpl">
+		<beans:property name="vpAppHierHistoryDAO" ref="vpAppHierHistoryDAO"></beans:property>
+	</beans:bean>
+	<!-- Vehicle Permission End -->
+	<!-- -->
+	<beans:bean id="ssItemTransactionMstDao"
+		class="com.ibcs.desco.subStore.dao.SSItemTransactionMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="ssItemTransactionMstService"
+		class="com.ibcs.desco.subStore.service.SSItemTransactionMstServiceImpl">
+		<beans:property name="ssItemTransactionMstDao" ref="ssItemTransactionMstDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csItemLocationMstDao"
+		class="com.ibcs.desco.cs.dao.CSItemLocationMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="csItemLocationMstService"
+		class="com.ibcs.desco.cs.service.CSItemLocationMstServiceImpl">
+		<beans:property name="csItemLocationMstDao" ref="csItemLocationMstDao"></beans:property>
+	</beans:bean>
+	<!-- ls to ss return config -->
+	<beans:bean id="ssReturnSlipMstDao"
+		class="com.ibcs.desco.subStore.dao.SSReturnSlipMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="ssReturnSlipMstService"
+		class="com.ibcs.desco.subStore.service.SSReturnSlipMstServiceImpl">
+		<beans:property name="ssReturnSlipMstDao" ref="ssReturnSlipMstDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="ssReturnSlipDtlDao"
+		class="com.ibcs.desco.subStore.dao.SSReturnSlipDtlDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="ssReturnSlipDtlService"
+		class="com.ibcs.desco.subStore.service.SSReturnSlipDtlServiceImpl">
+		<beans:property name="ssReturnSlipDtlDao" ref="ssReturnSlipDtlDao"></beans:property>
+	</beans:bean>
+
+	<!-- LS Item Transaction Start -->
+	<beans:bean id="lsItemTransactionMstDao"
+		class="com.ibcs.desco.localStore.dao.LSItemTransactionMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="lsItemTransactionMstService"
+		class="com.ibcs.desco.localStore.service.LSItemTransactionMstServiceImpl">
+		<beans:property name="lsItemTransactionMstDao" ref="lsItemTransactionMstDao"></beans:property>
+	</beans:bean>
+	<!-- LS Item Transaction End -->
+	<!-- for contractor -->
+	<beans:bean id="contractorRepresentiveDao"
+		class="com.ibcs.desco.contractor.dao.ContractorRepresentiveDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="contractorRepresentiveService"
+		class="com.ibcs.desco.contractor.service.ContractorRepresentiveServiceImpl">
+		<beans:property name="contractorRepresentiveDao" ref="contractorRepresentiveDao"></beans:property>
+	</beans:bean>
+	<beans:bean id="pndJobDtlDao"
+		class="com.ibcs.desco.contractor.dao.PndJobDtlDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="pndJobDtlService"
+		class="com.ibcs.desco.contractor.service.PndJobDtlServiceImpl">
+		<beans:property name="pndJobDtlDao" ref="pndJobDtlDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="cnSsRequisitionApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.CnSsRequisitionApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="cnSsRequisitionApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.CnSsRequisitionApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="cnSsRequisitionApprovalHierarchyHistoryDao"
+			ref="cnSsRequisitionApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="cnSsReturnSlipApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.CnSsReturnSlipApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="cnSsReturnSlipApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.CnSsReturnSlipApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="cnSsReturnSlipApprovalHierarchyHistoryDao"
+			ref="cnSsReturnSlipApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+	<!-- contractor -->
+	<!-- SSVehicle Permission Start -->
+	<beans:bean id="ssVehiclePermissionDAO"
+		class="com.ibcs.desco.subStore.dao.SSVehiclePermissionDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="ssVehiclePermissionService"
+		class="com.ibcs.desco.subStore.service.SSVehiclePermissionServiceImpl">
+		<beans:property name="ssVehiclePermissionDAO" ref="ssVehiclePermissionDAO"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="ssVpAppHierHistoryDAO"
+		class="com.ibcs.desco.subStore.dao.SSVPAppHierHistoryDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="ssVpAppHierHistoryService"
+		class="com.ibcs.desco.subStore.service.SSVPAppHierHistoryServiceImpl">
+		<beans:property name="ssVpAppHierHistoryDAO" ref="ssVpAppHierHistoryDAO"></beans:property>
+	</beans:bean>
+	<!-- SSVehicle Permission End -->
+
+	<!-- SS location start -->
+	<beans:bean id="ssItemLocationMstDao"
+		class="com.ibcs.desco.subStore.dao.SSItemLocationMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="ssItemLocationMstService"
+		class="com.ibcs.desco.subStore.service.SSItemLocationMstServiceImpl">
+		<beans:property name="ssItemLocationMstDao" ref="ssItemLocationMstDao"></beans:property>
+	</beans:bean>
+	<!-- SS location End -->
+
+	<!-- CS Khath Transfer Start -->
+	<beans:bean id="khathTransferHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.KhathTransferHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+	<beans:bean id="khathTransferHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.KhathTransferHierarchyHistoryServiceImpl">
+		<beans:property name="khathTransferHierarchyHistoryDao"
+			ref="khathTransferHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+
+	<!-- CS Khath Transfer End -->
+
+	<!-- LS location start -->
+	<beans:bean id="lsItemLocationMstDao"
+		class="com.ibcs.desco.localStore.dao.LSItemLocationMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="lsItemLocationMstService"
+		class="com.ibcs.desco.localStore.service.LSItemLocationMstServiceImpl">
+		<beans:property name="lsItemLocationMstDao" ref="lsItemLocationMstDao"></beans:property>
+	</beans:bean>
+	<!-- LS location End -->
+
+	<!-- jobTemplate Start -->
+	<beans:bean id="jobTemplateDtlDao"
+		class="com.ibcs.desco.contractor.dao.JobTemplateDtlDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="jobTemplateDtlService"
+		class="com.ibcs.desco.contractor.service.JobTemplateDtlServiceImpl">
+		<beans:property name="jobTemplateDtlDao" ref="jobTemplateDtlDao"></beans:property>
+	</beans:bean>
+	<!-- jobTemplate End -->
+
+	<!-- CS Khath Transfer Start -->
+	<beans:bean id="jobEstimationApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.JobEstimationApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="jobEstimationApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.JobEstimationApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="jobEstimationApprovalHierarchyHistoryDao"
+			ref="jobEstimationApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+
+	<!-- CS Khath Transfer End -->
+
+
+	<!-- asBuilt Start -->
+	<beans:bean id="asBuiltApprovalHierarchyHistoryDao"
+		class="com.ibcs.desco.common.dao.AsBuiltApprovalHierarchyHistoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="asBuiltApprovalHierarchyHistoryService"
+		class="com.ibcs.desco.common.service.AsBuiltApprovalHierarchyHistoryServiceImpl">
+		<beans:property name="asBuiltApprovalHierarchyHistoryDao"
+			ref="asBuiltApprovalHierarchyHistoryDao"></beans:property>
+	</beans:bean>
+	<!--asBuilt End -->
+
+	<!-- demandNote Start -->
+	<beans:bean id="demandNoteDao"
+		class="com.ibcs.desco.procurement.dao.DemandNoteDAOImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="demandNoteService"
+		class="com.ibcs.desco.procurement.service.DemandNoteServiceImpl">
+		<beans:property name="demandNoteDao" ref="demandNoteDao"></beans:property>
+	</beans:bean>
+	<!--demandNote End -->
+
+	<!-- Fixed Asset Start -->
+	<beans:bean id="fixedAssetCategoryDao"
+		class="com.ibcs.desco.fixedassets.Dao.FixedAssetCategoryDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="fixedAssetCategoryService"
+		class="com.ibcs.desco.fixedassets.service.FixedAssetCategoryServiceImpl">
+		<beans:property name="fixedAssetCategoryDao" ref="fixedAssetCategoryDao"></beans:property>
+	</beans:bean>
+	<!--Fixed Asset End -->
+	<!--Workshop Start -->
+	<beans:bean id="meterTestingReportDao"
+		class="com.ibcs.desco.workshop.Dao.MeterTestingReportDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="meterTestingReportService"
+		class="com.ibcs.desco.workshop.service.MeterTestingReportServiceImpl">
+		<beans:property name="meterTestingReportDao" ref="meterTestingReportDao"></beans:property>
+	</beans:bean>
+	<!--Workshop End -->
+	
+	<!--Workshop Start -->
+	<beans:bean id="wSTransformerDao"
+		class="com.ibcs.desco.workshop.Dao.WSTransformerDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="wSTransformerService"
+		class="com.ibcs.desco.workshop.service.WSTransformerServiceImpl">
+		<beans:property name="wSTransformerDao" ref="wSTransformerDao"></beans:property>
+	</beans:bean>
+	<!--Workshop End -->
+	
+	<!--Auction Start -->
+	<beans:bean id="auctionDao"
+		class="com.ibcs.desco.cs.dao.AuctionDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="auctionService"
+		class="com.ibcs.desco.cs.service.AuctionServiceImpl">
+		<beans:property name="auctionDao" ref="auctionDao"></beans:property>
+	</beans:bean>
+	<!--Auction End -->
+	
+	
+	
+	<!-- Added by galeb as test -->
+	<!-- <beans:bean id="afmChartOfAccountsTestDao"
+		class="com.ibcs.desco.test.dao.AfmChartOfAccountsTestDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+	
+	<beans:bean id="afmChartOfAccountsTestService"
+		class="com.ibcs.desco.test.service.AfmChartOfAccountsTestServiceImpl">
+		<beans:property name="afmChartOfAccountsTestDao" ref="afmChartOfAccountsTestDao"></beans:property>
+	</beans:bean>
+	
+	Added by galeb 
+	budget starts
+	<beans:bean id="budgetMstDao"
+		class="com.ibcs.desco.budget.dao.BudgetMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="budgetMstService"
+		class="com.ibcs.desco.budget.service.BudgetMstServiceImpl">
+		<beans:property name="budgetMstDao" ref="budgetMstDao"></beans:property>
+	</beans:bean> -->
+	<!-- budget ends -->
+	
+<!-- 	Added by galeb 
+	budget starts -->
+	<beans:bean id="budgetMstDao"
+		class="com.ibcs.desco.budget.dao.BudgetMstDaoImpl">
+		<beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>
+
+	<beans:bean id="budgetMstService"
+		class="com.ibcs.desco.budget.service.BudgetMstServiceImpl">
+		<beans:property name="budgetMstDao" ref="budgetMstDao"></beans:property>
+	</beans:bean>
+</beans:beans>

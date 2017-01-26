@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- @author Ahasanul Ashid, IBCS, @author Abu Taleb, IBCS -->
+<!-- Generated Mar 4, 2012 1:02:37 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <!-- <class name="com.ibcs.desco.acl.model.Roles" schema="${database.user}" table="ROLES"> -->
+  <class name="com.ibcs.desco.acl.model.Roles" table="ROLES">
+    <id name="id">
+      <column name="ID"/>
+      <generator class="increment"/>
+    </id>
+    <property name="role_id">
+      <column length="100" name="ROLE_ID" not-null="true"/>
+    </property>
+    <property name="role" type="string">
+      <column length="1000" name="ROLE"/>
+    </property>
+  </class>
+</hibernate-mapping>

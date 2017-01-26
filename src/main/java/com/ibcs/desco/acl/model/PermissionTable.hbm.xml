@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- @author Ahasanul Ashid, IBCS, @author Abu Taleb, IBCS -->
+<!-- Generated Mar 4, 2012 1:02:37 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+<!--   <class name="com.ibcs.desco.acl.model.PermissionTable" schema="${database.user}" table="PERMISSION_TABLE"> -->
+  <class name="com.ibcs.desco.acl.model.PermissionTable" table="PERMISSION_TABLE">
+    <id name="p_id">
+      <column name="P_ID"/>
+      <generator class="increment"/>
+    </id>
+    <property name="role_id">
+      <column name="ROLE_ID"/>
+    </property>
+    <property name="object_id">
+      <column name="OBJECT_ID"/>
+    </property>
+    <property name="p_read">
+      <column name="P_READ"/>
+    </property>
+    <property name="p_write">
+      <column name="P_WRITE"/>
+    </property>
+    <property name="p_edit">
+      <column name="P_EDIT"/>
+    </property>
+    <property name="p_delete">
+      <column name="P_DELETE"/>
+    </property>
+  </class>
+</hibernate-mapping>

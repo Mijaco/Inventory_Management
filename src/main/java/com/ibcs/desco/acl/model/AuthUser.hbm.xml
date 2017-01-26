@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+
+<!-- @author Ahasanul Ashid, IBCS, @author Abu Taleb, IBCS -->
+
+<!-- Generated Mar 4, 2012 1:02:37 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+	<!-- <class name="com.ibcs.desco.acl.model.AuthUser" schema="${database.user}" 
+		table="AUTH_USER"> -->
+	<class name="com.ibcs.desco.acl.model.AuthUser" table="AUTH_USER">
+		<id name="id">
+			<column name="ID" />
+			<generator class="increment" />
+		</id>
+		<property name="password" type="string">
+			<column length="100" name="PASSWORD" />
+		</property>
+		<property name="email" type="string">
+			<column length="100" name="EMAIL" />
+		</property>
+		<property name="name" type="string">
+			<column length="100" name="NAME" />
+		</property>
+		<property name="userid" type="string">
+			<column length="100" name="USERID" />
+		</property>
+		<property name="roleid">
+			<column name="ROLEID" precision="22" scale="0" />
+		</property>
+		
+		<property name="active" type="boolean">
+			<column length="1" name="ISACTIVE" />
+		</property>
+		
+		<property name="locked" type="boolean">
+			<column length="1" name="LOCKED" />
+		</property>
+		
+		<property name="loginCounter" type="integer">
+			<column length="1" name="LOGIN_COUNTER" />
+		</property>
+	</class>
+</hibernate-mapping>

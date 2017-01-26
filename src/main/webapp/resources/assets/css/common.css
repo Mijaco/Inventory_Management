@@ -1,0 +1,42 @@
+.ubuntu-font {
+	font-family: 'Ubuntu Condensed', sans-serif;
+}
+
+/* added by taleb : editable select css start : http://jsfiddle.net/nwH8A/ */
+.select-editable {
+	position: relative;
+	background-color: white;
+	border: solid grey 1px;
+	width: 120px;
+	height: 18px;
+}
+
+.select-editable select {
+	position: absolute;
+	top: 5px;
+	left: 10px;
+	font-size: 14px;
+	/* border: none; */
+	width: 120px;
+	margin: 0;
+	border: solid grey 1px;
+	background: #ddd;
+}
+
+.select-editable input {
+	position: absolute;
+	top: 5px;
+	left: 12px;
+	width: 100px;
+	padding: 5px;
+	font-size: 14px;
+	/* border: none; */
+	border: solid grey 1px;
+	border-left: 0 !important;
+}
+
+.select-editable select:focus, .select-editable input:focus {
+	/* outline: none; */
+}
+
+/* editable select css end */
